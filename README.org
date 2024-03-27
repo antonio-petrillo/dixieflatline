@@ -33,3 +33,8 @@ In the private chat the bot will send all the previous stored message from the c
 + Add command to list all the commands.
 + Add shortname for the commands, i.e. =!h -> !history= and =!i -> !ignore=.
 + Add more paramters to configure the bot, i.e. param to manage the tls config etcetera.
+
+* Name origin
+IRC is the most /cyberpunk/ thing that I've used in a while.
+Furthermore, the first iterations of the bot lose all the data on restart, this reminded me of the character of /Dixie Flatline/ in Neuromancer of W.Gibbson, hence the name.
+Happy hacking.
