@@ -65,8 +65,6 @@ func main() {
 		panic(err)
 	}
 
-	// irc.AddTrigger(historySaveCommand)
-	// irc.AddTrigger(historyShowCommand)
 	irc.AddTrigger(history.HistorySaveTrigger())
 	irc.AddTrigger(history.HistoryShowTrigger())
 	irc.Logger.SetHandler(log.StdoutHandler)

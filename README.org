@@ -1,0 +1,35 @@
+#+title: IRC bot to save the channel history
+
+* Rationale
+IRCv3 now support the *HISTORY* command, but not all clients can use it, hence I've written this simple bot to do the job.
+
+* Start the bot
+#+begin_src bash
+$ ./main -s ip_or_domani -p port -pass password -u username -n nickname -j ch_1,ch_2,ch_3,....,ch_n
+#+END_src
+Parameters:
++ =-s= The irc server ip or domain name, i.e. ~-s irc.libera.chat~
++ =-p= The port to connect to ~-p 6697~
++ =-pass= The password to use during connection ~-pass p455w04d~
++ =-u= The username for the bot, ~-u McCoy Pauley~
++ =-n= The nickname for the bot, ~-n dixieflatline~
++ =-j= The channels to join after the connection,  ~-j emacs,irc,cyberpunk~
+
+** Note
+Once the bot is started there is no way (for now) to let him join a channel, so if you want to save the history make sure to pass something to the =-j= param.
+
+* Commands
+Once the bot has joined a channel it will save all message that it receives, for a maximum of 100 messages.
+** =!ignore= command
+A message prefixed with =!ignore= will not be saved into the history
+** =!history= command
+A message prefixed with =!history= will start a new private chat between the sender and the bot.
+In the private chat the bot will send all the previous stored message from the channel in which the user sended the command.
+
+* Stuff to do
++ Add sqlite database to store the messages. :important:
+  For now the message are stored in a ~map~, there are all kind of problem, from losing the data if the bot is stopped to /thread and data race/ since the map is not guarded by a /mutex/.
++ Add parameter to the =!history= command, like =!history -l 10= to get only the last 10 messages.
++ Add command to list all the commands.
++ Add shortname for the commands, i.e. =!h -> !history= and =!i -> !ignore=.
++ Add more paramters to configure the bot, i.e. param to manage the tls config etcetera.
