@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/antonio-petrillo/dixieflatline/history"
+	"github.com/antonio-petrillo/dixieflatline/db"
 
 	hbot "github.com/whyrusleeping/hellabot"
 	log "gopkg.in/inconshreveable/log15.v2"
@@ -39,6 +40,12 @@ func (jf *joinFlag) Set(value string) error {
 func main() {
 	fmt.Printf("Bot starting\n")
 
+	conn, err := db.SetupDB("./history.db")
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+
 	var joinChannels joinFlag
 	flag.Var(&joinChannels, "j", "channels to join automatically")
 
@@ -65,8 +72,8 @@ func main() {
 		panic(err)
 	}
 
-	irc.AddTrigger(history.HistorySaveTrigger())
-	irc.AddTrigger(history.HistoryShowTrigger())
+	irc.AddTrigger(history.HistorySaveTrigger(conn))
+	irc.AddTrigger(history.HistoryShowTrigger(conn))
 	irc.Logger.SetHandler(log.StdoutHandler)
 
 	irc.Run()

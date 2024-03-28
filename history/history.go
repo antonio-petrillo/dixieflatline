@@ -1,76 +1,59 @@
 package history
 
 import (
+	"database/sql"
 	"fmt"
-	"github.com/antonio-petrillo/dixieflatline/utils"
-	hbot "github.com/whyrusleeping/hellabot"
 	"strings"
+	"github.com/antonio-petrillo/dixieflatline/db"
+	"github.com/antonio-petrillo/dixieflatline/message"
+	"github.com/antonio-petrillo/dixieflatline/utils"
+
+	hbot "github.com/whyrusleeping/hellabot"
 )
 
 const (
-	MAX_HIST = 100
+	MAX_HIST = 25
 )
 
-type HistoryEntry struct {
-	From string
-	Msg  string
-}
-
-// in memory database (pretty bad), also no locks guards the maps!!!
-var channelsHistories map[string][]HistoryEntry = map[string][]HistoryEntry{}
-
-// unexported var
-var historySaveCommand = &hbot.Trigger{
-	Condition: func(bot *hbot.Bot, m *hbot.Message) bool {
-		return m.Command == "PRIVMSG" && !(strings.HasPrefix(m.Trailing(), "!ignore") || strings.HasPrefix(m.Trailing(), "!history"))
-	},
-	Action: func(bot *hbot.Bot, m *hbot.Message) bool {
-		size := len(m.Params)
-		if size > 1 { // if size <= 1 then it is only trailing and I have no channel to store
-			channels := utils.GetChannelsFromParams(m.Params)
-			for _, channel := range channels {
-				channelHistory := channelsHistories[channel]
-				if len(channelHistory) > MAX_HIST {
-					channelHistory = channelHistory[1:]
+func HistorySaveTrigger(conn *sql.DB) *hbot.Trigger {
+	return &hbot.Trigger{
+		Condition: func(bot *hbot.Bot, m *hbot.Message) bool {
+			return m.Command == "PRIVMSG" && !(strings.HasPrefix(m.Trailing(), "!ignore") || strings.HasPrefix(m.Trailing(), "!history") || strings.HasPrefix(m.Trailing(), "!i") || strings.HasPrefix(m.Trailing(), "!h"))
+		},
+		Action: func(bot *hbot.Bot, m *hbot.Message) bool {
+			size := len(m.Params)
+			if size > 1 { // if size <= 1 then it is only trailing and I have no channel to store
+				channels := utils.GetChannelsFromParams(m.Params)
+				for _, channel := range channels {
+					db.StoreHistoryEntry(conn, channel, message.HistoryEntry{From: m.From, Msg: m.Trailing()})
 				}
-				channelHistory = append(channelHistory, HistoryEntry{From: m.From, Msg: m.Trailing()})
-				channelsHistories[channel] = channelHistory
 			}
-		}
-
-		return false
-	},
+			return false
+		},
+	}
 }
 
-// unexported var
-var historyShowCommand = &hbot.Trigger{
-	Condition: func(bot *hbot.Bot, m *hbot.Message) bool {
-		return m.Command == "PRIVMSG" && strings.HasPrefix(m.Trailing(), "!history")
-	},
-	Action: func(bot *hbot.Bot, m *hbot.Message) bool {
-		size := len(m.Params)
-		if size > 1 {
-			channels := utils.GetChannelsFromParams(m.Params)
-			for _, channel := range channels {
-				history := channelsHistories[channel]
-				if len(history) > 0 {
-					for _, message := range history {
-						bot.Send(fmt.Sprintf("PRIVMSG %s [in %s by %s]> %s", m.From , channel, message.From, message.Msg))
+func HistoryShowTrigger(conn *sql.DB) *hbot.Trigger {
+	return &hbot.Trigger{
+		Condition: func(bot *hbot.Bot, m *hbot.Message) bool {
+			return m.Command == "PRIVMSG" && (strings.HasPrefix(m.Trailing(), "!history") || strings.HasPrefix(m.Trailing(), "!h "))
+		},
+		Action: func(bot *hbot.Bot, m *hbot.Message) bool {
+			size := len(m.Params)
+			if size > 1 {
+				channels := utils.GetChannelsFromParams(m.Params)
+				for _, channel := range channels {
+					messages, err := db.RetrieveHistoryEntries(conn, channel, MAX_HIST)
+					if err == nil {
+						for i := len(messages) - 1; i >= 0; i-- {
+							bot.Send(fmt.Sprintf("PRIVMSG %s [in %s by %s]> %s", m.From , channel, messages[i].From, messages[i].Msg))
+						}
+					} else {
+						bot.Send(fmt.Sprintf("PRIVMSG %s :Retrieve history failed for %s", m.From, channel))
 					}
-				} else {
-				 	bot.Send(fmt.Sprintf("PRIVMSG %s :no prev history", m.From))
 				}
 			}
-		}
-
-		return false
-	},
-}
-
-func HistorySaveTrigger() *hbot.Trigger {
-	return historySaveCommand
-}
-
-func HistoryShowTrigger() *hbot.Trigger {
-	return historyShowCommand
+			return false
+		},
+	}
 }

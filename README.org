@@ -26,12 +26,12 @@ A message prefixed with =!ignore= will not be saved into the history
 A message prefixed with =!history= will start a new private chat between the sender and the bot.
 In the private chat the bot will send all the previous stored message from the channel in which the user sended the command.
 
-* Stuff to do
-+ Add sqlite database to store the messages. :important:
+* Stuff to do [2/4]
++ [X] Add sqlite database to store the messages.
   For now the message are stored in a ~map~, there are all kind of problem, from losing the data if the bot is stopped to /thread and data race/ since the map is not guarded by a /mutex/.
-+ Add parameter to the =!history= command, like =!history -l 10= to get only the last 10 messages.
-+ Add command to list all the commands.
-+ Add shortname for the commands, i.e. =!h -> !history= and =!i -> !ignore=.
++ [ ] Add parameter to the =!history= command, like =!history -l 10= to get only the last 10 messages.
++ [ ] Add command to list all the commands.
++ [X] Add shortname for the commands, i.e. =!h -> !history= and =!i -> !ignore=.
 + Add more paramters to configure the bot, i.e. param to manage the tls config etcetera.
 
 * Name origin
