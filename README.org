@@ -25,14 +25,18 @@ A message prefixed with =!ignore= will not be saved into the history
 ** =!history= command
 A message prefixed with =!history= will start a new private chat between the sender and the bot.
 In the private chat the bot will send all the previous stored message from the channel in which the user sended the command.
-
-* Stuff to do [2/4]
+** =!calc= command
+A basic lisp calculator, it only supports ~+~, ~-~, ~*~, ~/~ on double (aka float64) for now.
+* Stuff to do [3/5]
 + [X] Add sqlite database to store the messages.
   For now the message are stored in a ~map~, there are all kind of problem, from losing the data if the bot is stopped to /thread and data race/ since the map is not guarded by a /mutex/.
-+ [ ] Add parameter to the =!history= command, like =!history -l 10= to get only the last 10 messages.
++ [X] Add parameter to the =!history= command, like =!history -l 10= to get only the last 10 messages.
 + [ ] Add command to list all the commands.
 + [X] Add shortname for the commands, i.e. =!h -> !history= and =!i -> !ignore=.
-+ Add more paramters to configure the bot, i.e. param to manage the tls config etcetera.
++ [ ] Add more paramters to configure the bot, i.e. param to manage the tls config etcetera.
++ [ ] General refactor, some parts are not clearly separated:
+  + triggers commands
+  + mutually exclusive command
 
 * Name origin
 IRC is the most /cyberpunk/ thing that I've used in a while.
