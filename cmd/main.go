@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/antonio-petrillo/dixieflatline/calculator"
 	"github.com/antonio-petrillo/dixieflatline/history"
 	"github.com/antonio-petrillo/dixieflatline/db"
 
@@ -74,6 +75,7 @@ func main() {
 
 	irc.AddTrigger(history.HistorySaveTrigger(conn))
 	irc.AddTrigger(history.HistoryShowTrigger(conn))
+	irc.AddTrigger(calculator.CalcTrigger())
 	irc.Logger.SetHandler(log.StdoutHandler)
 
 	irc.Run()
